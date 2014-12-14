@@ -1,22 +1,35 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Loading and preprocessing the data
 
-```{r preprocessing, echo=TRUE}
+
+```r
 library(ggplot2)
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following object is masked from 'package:stats':
+## 
+##     filter
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 df <- read.csv("./activity.csv")
 df.clean <- df[complete.cases(df), ] # remove missing values
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r total_steps, echo=TRUE}
+
+```r
 total.steps <- aggregate(steps ~ date, data=df.clean, sum)
 total.barplot <- qplot(x=date, y=steps, data=total.steps,
                        geom="bar", stat="identity", position="dodge") +
@@ -24,13 +37,16 @@ total.barplot <- qplot(x=date, y=steps, data=total.steps,
 print(total.barplot + coord_flip())
 ```
 
-- The mean number of steps taken per day is `r format(mean(total.steps$steps), digits=6)`.  
+![](PA1_template_files/figure-html/total_steps-1.png) 
 
-- The median number of steps taken per day is `r median(total.steps$steps)`.
+- The mean number of steps taken per day is 10766.2.  
+
+- The median number of steps taken per day is 10765.
 
 ## What is the average daily activity pattern?
 
-```{r timeseries, echo=TRUE}
+
+```r
 avg.interval.steps <- aggregate(steps ~ interval, data=df.clean, mean)
 avg.interval.steps.plot <- qplot(x=interval, y=steps, data=avg.interval.steps,
                                  geom="line") +
@@ -38,17 +54,20 @@ avg.interval.steps.plot <- qplot(x=interval, y=steps, data=avg.interval.steps,
 print(avg.interval.steps.plot)
 ```
 
+![](PA1_template_files/figure-html/timeseries-1.png) 
+
 - The 5-min interval with the maximum number of steps, averaged across all days
-is `r avg.interval.steps$interval[which.max(avg.interval.steps$steps )]` 
-with `r format(max(avg.interval.steps$steps), digits=4)` steps.
+is 835 
+with 206.2 steps.
 
 ## Imputing missing values
 
-- The number of missing values in the dataset is `r sum(!complete.cases(df))`
+- The number of missing values in the dataset is 2304
 
 - Missing values are imputed with the mean # of steps for the corresponding 5-min interval 
 
-```{r imputedvalues}
+
+```r
 df.na <- df[which(!complete.cases(df)),]  # rows with missing values
 # replace NA with average of steps for interval
 df.na.filled <- merge(df.na, avg.interval.steps, by="interval")   
@@ -64,15 +83,18 @@ total.barplot <- qplot(x=date, y=steps, data=total.steps,
 print(total.barplot + coord_flip())
 ```
 
-- The mean number of steps taken per day is `r format(mean(total.steps$steps), digits=6)`.  
+![](PA1_template_files/figure-html/imputedvalues-1.png) 
 
-- The median number of steps taken per day is `r format(median(total.steps$steps), digits=6)`.
+- The mean number of steps taken per day is 10766.2.  
+
+- The median number of steps taken per day is 10766.2.
 
 - With imputed values, the mean remained the same, but median increased.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-``` {r weekdays.vs.weekends}
+
+```r
 df.imp$date <- as.Date(df.imp$date)
 df.imp$wend <- as.factor(ifelse(weekdays( df.imp$date) %in% c("Saturday","Sunday"), "Weekend", "Weekday")) 
 # summarise the data
@@ -88,3 +110,5 @@ p<-g + geom_line(color="deepskyblue1") +
         labs(x="Interval", y="Number of steps")
 print(p)
 ```
+
+![](PA1_template_files/figure-html/weekdays.vs.weekends-1.png) 
